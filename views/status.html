@@ -1,0 +1,58 @@
+<style>
+.show {
+  transition: opacity 400ms;
+}
+.hide {
+  opacity: 0;
+}
+</style>
+<script type="text/javascript">
+  console.log("Jajajaajaj")
+
+  function showStatus(status) {
+
+      for (const el of document.getElementsByClassName("status")) {
+          if (el.dataset["name"] == status) {
+              el.classList.remove("hide")
+              el.classList.add("show")
+          }
+          else {
+              el.classList.remove("show")
+              el.classList.add("hide")
+          }
+      }
+  }
+
+  document.addEventListener("DOMContentLoaded", function(event) { 
+
+      const evtSource = new EventSource("/events/{{.id}}");
+
+      evtSource.addEventListener("status", function(event) {
+          if (event.data == "started") {
+              showStatus("waiting")
+              evtSource.onmessage = function(event) {
+
+                  const newElement = document.createElement("li");
+                  const eventList = document.getElementById("list");
+
+                  newElement.textContent = "message: " + event.data;
+                  eventList.appendChild(newElement);
+              }
+          }
+          if (event.data == "stopped") {
+              showStatus("done")
+              evtSource.close();
+          }
+      });
+
+  });
+
+</script>
+<h3>Status {{ .full_name }}</h3>
+<div class="hide status" data-name="waiting">⌛</div>
+<div class="hide status" data-name="done">✅</div>
+<pre id="list"></pre>
+<a href="/show/{{ .full_name }}" class="hide status" data-name="done">{{.FullNameWithExtension}}</a>
+<a href="/scan">
+  Zurück
+</a>
