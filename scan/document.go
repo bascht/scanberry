@@ -1,10 +1,8 @@
 package scan
 
 import (
-	"fmt"
 	"time"
 )
-
 
 type Document struct {
 	Id     string
@@ -20,10 +18,8 @@ func (document Document) Args() []string {
 	if document.Duplex {
 		cmd = append(cmd, " -d")
 	}
-
 	cmd = append(cmd, document.FullName())
 
-	fmt.Println("cmd: ", cmd)
 	return cmd
 }
 
