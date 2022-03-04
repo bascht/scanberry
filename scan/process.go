@@ -1,12 +1,10 @@
 package scan
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -31,32 +29,21 @@ func Process(basedir string, document *Document) string {
 	commands = append(commands, Command{Name: "ocrmypdf", Args: []string{"--language=deu", filepath.Join(basedir, document.FullName()+"_input.pdf"), filepath.Join(basedir, document.FullName()+".pdf")}})
 
 	for _, command := range commands {
-		cmd := exec.Command(command.Name, command.Args...)
-
-		stderr, err := cmd.StderrPipe()
-		if err != nil {
-			log.Fatalf("could not get stderr pipe: %v", err)
-		}
-
-		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			log.Fatalf("could not get stdout pipe: %v", err)
-		}
-
 		done := make(chan bool)
 		go func() {
 			document.Events <- command.Name + " Startet"
-			merged := io.MultiReader(stderr, stdout)
-			scanner := bufio.NewScanner(merged)
+
+			scanner := command.NewScanner()
+
 			for scanner.Scan() {
 				document.Events <- scanner.Text()
 			}
 			document.Events <- command.Name + " Ist fast fertig"
 			done <- true
 		}()
-		cmd.Start()
+		command.Start()
 		document.Events <- command.Name + " Ist gestartet"
-		cmd.Wait()
+		command.Wait()
 		<-done
 	}
 
