@@ -16,3 +16,7 @@ tasks:
       go install
       go build
       go test
+
+  - test: |
+      cd scanberry
+      go test ./...
