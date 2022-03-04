@@ -8,6 +8,7 @@ sources:
   - git@git.sr.ht:~bascht/scanberry
 packages:
   - nixos.go
+  - nixos.gcc
   - nixos.gnumake
 tasks:
   - build: |
