@@ -1,0 +1,17 @@
+---
+image: nixos/unstable
+repositories:
+  nixpkgs: https://nixos.org/channels/nixpkgs-unstable
+secrets:
+  - 98286ad0-2479-4e58-a1c6-bf5cd4dba009
+sources:
+  - git@git.sr.ht:~bascht/scanberry
+packages:
+  - nixos.go
+  - nixos.gnumake
+tasks:
+  - build: |
+      cd scanberry
+      go install
+      go build
+      go test
