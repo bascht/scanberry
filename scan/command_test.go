@@ -30,12 +30,11 @@ func TestCommandOutput(t *testing.T) {
 			t.Logf("Found correct output of %v", text)
 		}
 	}
-	t.Logf("COMMAND %v", command.cmd.ProcessState.ExitCode())
 
-	// TODO: Find out why this is always -1
-	// if command.ExitCode() != 0 {
-	// 	t.Error("Didn't run successfully", command.ExitCode())
-	// }
+	command.Wait()
+	if ! command.RanSuccessful() {
+		t.Error("Didn't run successfully: ")
+	}
 }
 
 func TestCommandFailure(t *testing.T) {

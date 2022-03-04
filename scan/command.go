@@ -41,6 +41,6 @@ func (command *Command) NewScanner() *bufio.Scanner {
 	return bufio.NewScanner(merged)
 }
 
-func (command *Command) ExitCode() int {
-	return command.cmd.ProcessState.ExitCode()
+func (command *Command) RanSuccessful() bool {
+	return command.cmd.ProcessState.ExitCode() == 0
 }
