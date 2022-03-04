@@ -30,19 +30,21 @@ func Process(basedir string, document *Document) string {
 
 	for _, command := range commands {
 		done := make(chan bool)
-		command.Start()
+		scanner := command.Launch()
+
 		go func() {
 			document.Events <- command.Name + " Startet"
-
-			scanner := command.NewScanner()
 
 			for scanner.Scan() {
 				document.Events <- scanner.Text()
 			}
+
 			document.Events <- command.Name + " Ist fast fertig"
 			done <- true
+			document.Events <- command.Name + " Ist gestartet"
 		}()
-		document.Events <- command.Name + " Ist gestartet"
+
+		command.cmd.Start()
 		command.Wait()
 		<-done
 	}

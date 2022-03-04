@@ -13,16 +13,8 @@ type Command struct {
 	cmd *exec.Cmd
 }
 
-func (command *Command) Start() {
+func (command *Command) Launch() *bufio.Scanner {
 	command.cmd = exec.Command(command.Name, command.Args...)
-	command.cmd.Start()
-}
-
-func (command *Command) Wait() {
-	command.cmd.Wait()
-}
-
-func (command *Command) NewScanner() *bufio.Scanner {
 
 	stderr, err := command.cmd.StderrPipe()
 	if err != nil {
@@ -33,8 +25,15 @@ func (command *Command) NewScanner() *bufio.Scanner {
 	if err != nil {
 		log.Fatalf("could not get stdout pipe: %v", err)
 	}
-	merged := io.MultiReader(stderr, stdout)
+
+	merged := io.MultiReader(stdout, stderr)
+	// command.cmd.Start()
+
 	return bufio.NewScanner(merged)
+}
+
+func (command *Command) Wait() {
+	command.cmd.Wait()
 }
 
 func (command *Command) RanSuccessful() bool {

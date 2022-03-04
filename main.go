@@ -108,13 +108,11 @@ func main() {
 		c.Set("Transfer-Encoding", "chunked")
 
 		id := c.Params("id")
-		fmt.Println("Searching for " + id)
 		document := documents[id]
 
 		c.Context().SetBodyStreamWriter(fasthttp.StreamWriter(func(w *bufio.Writer) {
 			fmt.Fprintf(w, "event: status\ndata: started\n\n")
 			w.Flush()
-			fmt.Println("WRITER")
 
 			for event := range document.Events {
 				fmt.Fprintf(w, "data: Message: %s\n\n", event)
