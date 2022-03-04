@@ -30,8 +30,9 @@ func Process(basedir string, document *Document) string {
 
 	for _, command := range commands {
 		done := make(chan bool)
-		scanner := command.Launch()
+		scanner := command.GetScanner()
 
+		command.Start()
 		go func() {
 			document.Events <- command.Name + " Startet"
 
@@ -43,8 +44,6 @@ func Process(basedir string, document *Document) string {
 			done <- true
 			document.Events <- command.Name + " Ist gestartet"
 		}()
-
-		command.cmd.Start()
 		command.Wait()
 		<-done
 	}

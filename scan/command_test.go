@@ -8,18 +8,21 @@ import (
 func TestCommandRun(t *testing.T) {
 	command := Command{Name: "echo", Args: []string{"Here", "be", "a", "test"}}
 
-	scanner := command.Launch()
+	scanner := command.GetScanner()
+	command.Start()
 	for scanner.Scan() {
 		text := scanner.Text()
 		if text != "Here be a test" {
 			t.Error("Didn't do shit with" + text)
 		}
 	}
+	command.Wait()
 }
 func TestCommandOutput(t *testing.T) {
 	command := Command{Name: "go", Args: []string{"version"}}
 
-	scanner := command.Launch()
+	scanner := command.GetScanner()
+	command.Start()
 	for scanner.Scan() {
 		text := scanner.Text()
 		if !strings.HasPrefix(text, "go version") {
@@ -37,7 +40,8 @@ func TestCommandOutput(t *testing.T) {
 
 func TestCommandFailure(t *testing.T) {
 	command := Command{Name: "go", Args: []string{"gahdned"}}
-	scanner := command.Launch()
+	scanner := command.GetScanner()
+	command.Start()
 	var text []string
 	for scanner.Scan() {
 		text = append(text, scanner.Text())
