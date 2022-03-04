@@ -30,6 +30,7 @@ func Process(basedir string, document *Document) string {
 
 	for _, command := range commands {
 		done := make(chan bool)
+		command.Start()
 		go func() {
 			document.Events <- command.Name + " Startet"
 
@@ -41,7 +42,6 @@ func Process(basedir string, document *Document) string {
 			document.Events <- command.Name + " Ist fast fertig"
 			done <- true
 		}()
-		command.Start()
 		document.Events <- command.Name + " Ist gestartet"
 		command.Wait()
 		<-done

@@ -13,11 +13,8 @@ type Command struct {
 	cmd *exec.Cmd
 }
 
-func (command *Command) run() {
-	command.cmd = exec.Command(command.Name, command.Args...)
-}
-
 func (command *Command) Start() {
+	command.cmd = exec.Command(command.Name, command.Args...)
 	command.cmd.Start()
 }
 
@@ -26,7 +23,6 @@ func (command *Command) Wait() {
 }
 
 func (command *Command) NewScanner() *bufio.Scanner {
-	command.run()
 
 	stderr, err := command.cmd.StderrPipe()
 	if err != nil {
