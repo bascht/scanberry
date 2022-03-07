@@ -12,7 +12,7 @@ func TestDocumentFullName(t *testing.T) {
 		Name:   "Here-Be-A-Test-Name",
 		Date:   time.Date(2020, 10, 12, 20, 15, 00, 0, time.UTC),
 		Duplex: true,
-		Events: make(chan string),
+		Events: make(chan Event),
 	}
 
 	if document.FullName() != "2020-10-12-201500-Here-Be-A-Test-Name" {

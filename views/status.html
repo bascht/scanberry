@@ -7,8 +7,6 @@
 }
 </style>
 <script type="text/javascript">
-  console.log("Jajajaajaj")
-
   function showStatus(status) {
 
       for (const el of document.getElementsByClassName("status")) {
@@ -31,11 +29,13 @@
           if (event.data == "started") {
               showStatus("waiting")
               evtSource.onmessage = function(event) {
+                  messageEvent = JSON.parse(event.data)
 
                   const newElement = document.createElement("li");
                   const eventList = document.getElementById("list");
 
-                  newElement.textContent = "message: " + event.data;
+                  showStatus(messageEvent.Type)
+                  newElement.textContent = "message: " + messageEvent.Message;
                   eventList.appendChild(newElement);
               }
           }
@@ -51,6 +51,8 @@
 <h3>Status {{ .full_name }}</h3>
 <div class="hide status" data-name="waiting">⌛</div>
 <div class="hide status" data-name="done">✅</div>
+<div class="hide status" data-name="scanimage">📃</div>
+<div class="hide status" data-name="ocrmypdf">👀</div>
 <pre id="list"></pre>
 <a href="/show/{{ .full_name }}" class="hide status" data-name="done">{{.FullNameWithExtension}}</a>
 <a href="/scan">

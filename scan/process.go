@@ -3,7 +3,6 @@ package scan
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -34,24 +33,23 @@ func Process(basedir string, document *Document) string {
 
 		command.Start()
 		go func() {
-			document.Events <- command.Name + " Startet"
+			document.Events <- Event{Message: command.Name + " Startet", Type: "info"}
 
 			for scanner.Scan() {
-				document.Events <- scanner.Text()
+				document.Events <- Event{Message: scanner.Text(), Type: command.Name }
 			}
 
-			document.Events <- command.Name + " Ist fast fertig"
 			done <- true
-			document.Events <- command.Name + " Ist gestartet"
 		}()
 		command.Wait()
-		<-done
 	}
 
+	document.Events <- Event{Message: "Starting to copy", Type: "info"}
 	// Open original file
 	original, err := os.Open(filepath.Join(basedir, document.FullNameWithExtension()))
 	if err != nil {
-		log.Fatal(err)
+		document.Events <- Event{Message: "Alles kaputt", Type: "error"}
+		// log.Fatal(err)
 	}
 	defer original.Close()
 
@@ -59,14 +57,16 @@ func Process(basedir string, document *Document) string {
 	newPath, err := filepath.Abs("./downloads/" + document.FullNameWithExtension())
 	new, err := os.Create(newPath)
 	if err != nil {
-		log.Fatal(err)
+		document.Events <- Event{Message: "Alles kaputt", Type: "error"}
+		// log.Fatal(err)
 	}
 	defer new.Close()
 
 	//This will copy
 	bytesWritten, err := io.Copy(new, original)
 	if err != nil {
-		log.Fatal(err)
+		document.Events <- Event{Message: "Alles kaputt", Type: "error"}
+		// log.Fatal(err)
 	}
 	fmt.Printf("Bytes Written: %d\n", bytesWritten)
 

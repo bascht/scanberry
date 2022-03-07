@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -74,7 +75,7 @@ func main() {
 			Name:   c.FormValue("name"),
 			Date:   time.Now(),
 			Duplex: c.FormValue("duplex") == "on",
-			Events: make(chan string),
+			Events: make(chan scan.Event),
 		}
 
 		documents[document.Id] = document
@@ -115,7 +116,12 @@ func main() {
 			w.Flush()
 
 			for event := range document.Events {
-				fmt.Fprintf(w, "data: Message: %s\n\n", event)
+				msg, err := json.Marshal(event)
+				if err != nil  {
+					log.Fatal("Could not encode event")
+				}
+
+				fmt.Fprintf(w, "data: %s \n\n", msg)
 				w.Flush()
 			}
 

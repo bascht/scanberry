@@ -9,7 +9,7 @@ type Document struct {
 	Name   string
 	Duplex bool
 	Date   time.Time
-	Events chan string
+	Events chan Event
 }
 
 func (document Document) Args() []string {
