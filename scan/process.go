@@ -28,20 +28,17 @@ func Process(basedir string, document *Document) {
 	commands = append(commands, Command{Name: "cp", Args: []string{filepath.Join(basedir, "downloads", document.FullName()+".pdf"), "/mnt/himbeerkompott/home/bascht/Documents/Scans"}})
 
 		<- document.Events
-		document.Events <- Event{Message: "Geht los", Type: "info"}
 	for _, command := range commands {
-		// done := make(chan bool)
 		scanner := command.GetScanner()
 		command.Start()
 
 		go func() {
-			document.Events <- Event{Message: command.Name + " Startet mit " + strings.Join(command.Args, " "), Type: "info"}
 
+			document.Events <- Event{Message: "Starting with args " + strings.Join(command.Args, " "), Type: command.Name }
 			for scanner.Scan() {
 				document.Events <- Event{Message: scanner.Text(), Type: command.Name }
 			}
 
-			// done <- true
 		}()
 		command.Wait()
 		if command.cmd.ProcessState.ExitCode() != 0 {
