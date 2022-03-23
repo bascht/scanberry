@@ -25,7 +25,7 @@ func (document Document) Args() []string {
 
 func (document Document) FullName() string {
 
-	return document.Date.Format("2006-01-02-150405") + "-" + document.Name
+	return document.Name
 }
 
 func (document Document) FullNameWithExtension() string {
