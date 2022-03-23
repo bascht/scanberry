@@ -31,14 +31,14 @@
 </script>
 
 <form action="/scan" method="post">
-  <input name="name" style="width: 70%" disabled="disabled" value="">
-  <div class="form-group" style="clear: both;">
-    <div style="float: left">
-      <label>
-        <input name="timestamp" value="{{ .Timestamp }}">
-        Datum
-      </label>
-    </div>
+  <input name="name" style="width: 70%; font-size: 1.2em; color: cadetblue; background-color: aliceblue;" readonly="readonly" value="">
+  <div>
+    <label>
+      <input name="timestamp" value="{{ .Timestamp }}">
+      Datum
+    </label>
+  </div>
+  <div>
     <label>
       <select name="template">
         {{ range .Prefixes }}
@@ -47,22 +47,19 @@
       </select>
       Template
     </label>
-
   </div>
-  <div style="float: left">
+
+  <label>
+    <input name="postfix" value="">
+    Anhang
+  </label>
+  <div class="form-group" style="clear: both;">
     <label>
-      <input name="postfix" value="">
-      Anhang
+      <input name="duplex" type="checkbox">
+      Scan duplex (front & back)?
     </label>
   </div>
-</div>
-<div class="form-group" style="clear: both;">
-  <label>
-    <input name="duplex" type="checkbox">
-    Scan duplex (front & back)?
-  </label>
-</div>
-<div class="form-group" style="clear: both;">
-  <input type="submit" value="Scan!" class="btn">
-</div>
+  <div class="form-group" style="clear: both;">
+    <input type="submit" value="Scan!" class="btn">
+  </div>
 </form>
