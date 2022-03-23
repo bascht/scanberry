@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/adrg/xdg"
@@ -18,6 +19,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/template/html"
+	"github.com/spf13/viper"
 
 	"git.bascht.space/bascht/scanberry/scan"
 )
@@ -25,7 +27,7 @@ import (
 //go:embed views/*
 var viewsfs embed.FS
 
-var documents = make(map[string]scan.Document)
+var documents = make(map[string]*scan.Document)
 var basedir string
 
 func main() {
@@ -38,13 +40,28 @@ func main() {
 	// engine := html.NewFileSystem(http.Dir("./views"), ".html")
 	engine := html.NewFileSystem(http.FS(viewsfs), ".html")
 
-	basedir = xdg.RuntimeDir + "/himbeerscan"
-	os.MkdirAll(filepath.Join(basedir, "downloads"), os.ModePerm)
-	os.Chdir(basedir)
+	viper.SetConfigName("scanberry")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath(filepath.Join(xdg.ConfigHome, "scanberry"))
 
-	engine.Reload(true) // Optional. Default: false
-	engine.Debug(false) // Optional. Default: false
-	engine.Layout("embed") // Optional. Default: "embed"
+	viper.SetDefault("listen.host", "0.0.0.0")
+	viper.SetDefault("listen.port", "0.0.0.0")
+	// viper.SetDefault("filename.prefixes", [""])
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal("Could not load config")
+	}
+
+	basedir = xdg.RuntimeDir + "/himbeerscan"
+	os.MkdirAll(filepath.Join(basedir, "downloads"), 0700)
+	os.Chdir(basedir)
+	fmt.Sprintf("Starting to work in %v", basedir)
+
+	engine.Reload(true)       // Optional. Default: false
+	engine.Debug(false)       // Optional. Default: false
+	engine.Layout("embed")    // Optional. Default: "embed"
 	engine.Delims("{{", "}}") // Optional. Default: engine delimiters
 
 	// engine.AddFunc("greet", func(name string) string {
@@ -63,25 +80,34 @@ func main() {
 	})
 
 	app.Get("/scan", func(c *fiber.Ctx) error {
+		prefixes := viper.GetStringSlice("filename.prefixes")
+		timestamp := time.Now().Format("2006-01-02")
 		return c.Render("views/scan", fiber.Map{
-			"Title": "Hello, World!",
+			"Title":    "Hello, World!",
+			"Prefixes": prefixes,
+			"Timestamp": timestamp,
 		}, "views/layouts/main")
 	})
 
 	app.Post("/scan", func(c *fiber.Ctx) error {
 
+		name := strings.Join([]string{c.FormValue("timestamp", time.Now().Format("2006-01-02")), c.FormValue("template"), c.FormValue("name")}, "-")
+
 		document := scan.Document{
 			Id:     uuid.NewString(),
-			Name:   c.FormValue("name"),
+			Name:   name,
 			Date:   time.Now(),
 			Duplex: c.FormValue("duplex") == "on",
 			Events: make(chan scan.Event),
 		}
 
-		documents[document.Id] = document
+
+		documents[document.Id] = & document
 
 		go scan.Process(basedir, &document)
+		document.Events <- scan.Event{Message: "Geht los", Type: "info"}
 
+		// document.Events <- scan.Event{Message: "Scanning initiated", Type: "info"}
 		return c.Render("views/status", fiber.Map{
 			"id":                    document.Id,
 			"name":                  document.Name,
@@ -92,14 +118,16 @@ func main() {
 
 	app.Get("/show/:id", func(c *fiber.Ctx) error {
 		id := c.Params("id")
-		document := documents[id]
-
-		return c.Render("views/show", fiber.Map{
-			"id":                    document.Id,
-			"name":                  document.Name,
-			"FullName":              document.FullName(),
-			"FullNameWithExtension": document.FullNameWithExtension(),
-		}, "views/layouts/main")
+		if document, ok := documents[id]; ok {
+			return c.Render("views/show", fiber.Map{
+				"id":                    document.Id,
+				"name":                  document.Name,
+				"FullName":              document.FullName(),
+				"FullNameWithExtension": document.FullNameWithExtension(),
+			}, "views/layouts/main")
+		} else {
+			return c.Status(fiber.StatusNotFound).SendString("Sorry, document no longer exists")
+		}
 	})
 
 	app.Get("/events/:id", func(c *fiber.Ctx) error {
@@ -117,7 +145,7 @@ func main() {
 
 			for event := range document.Events {
 				msg, err := json.Marshal(event)
-				if err != nil  {
+				if err != nil {
 					log.Fatal("Could not encode event")
 				}
 
@@ -135,4 +163,3 @@ func main() {
 
 	log.Fatal(app.Listen(":3000"))
 }
-

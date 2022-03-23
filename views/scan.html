@@ -8,8 +8,15 @@
   <div class="form-group" style="clear: both;">
     <div style="float: left">
     <label>
+      <input name="timestamp" value="{{ .Timestamp }}">
+      Datum
+      </label>
+    </div>
+    <label>
       <select name="template">
-        <option name="xyz">xyz</option>
+        {{ range .Prefixes }}
+        <option name="{{ . }}">{{ . }}</option>
+        {{ end }}
         </select>
       Template
       </label>
@@ -17,7 +24,7 @@
     </div>
     <div style="float: left">
     <label>
-      <input name="name" value="ohai">
+      <input name="name" value="">
       Name
       </label>
     </div>

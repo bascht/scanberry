@@ -2,6 +2,7 @@ package scan
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os/exec"
 )
@@ -25,6 +26,7 @@ func (command *Command) GetScanner() *bufio.Scanner {
 }
 
 func (command *Command) Start() {
+	fmt.Sprintf("Running Command %v \n", command)
 	command.cmd.Start()
 }
 

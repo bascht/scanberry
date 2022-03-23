@@ -9,6 +9,7 @@ require (
 	github.com/gofiber/template v1.6.23 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/klauspost/compress v1.14.4 // indirect
+	github.com/spf13/viper v1.10.1 // indirect
 	github.com/valyala/fasthttp v1.33.0 // indirect
 	golang.org/x/sys v0.0.0-20220224120231-95c6836cb0e7 // indirect
 )
