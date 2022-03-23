@@ -101,7 +101,7 @@ func main() {
 		documents[document.Id] = &document
 
 		go scan.Process(basedir, &document)
-		document.Events <- scan.Event{Message: "Geht los", Type: "info"}
+		document.Events <- scan.Event{Message: "Starting to scan", Type: "starting"}
 
 		// document.Events <- scan.Event{Message: "Scanning initiated", Type: "info"}
 		return c.Render("views/status", fiber.Map{
