@@ -1,15 +1,42 @@
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function(event) { 
+
+      const form = document.querySelector('form');
+
+      function updatePreview(event) {
+          fillName(event.target.form)
+      }
+
+      function fillName(form) {
+          const formData = new FormData(form)
+          var preview = formData.get("timestamp")
+
+          if (formData.get("template") != "") {
+              preview += "-"
+              preview += formData.get("template")
+          }
+
+          if (formData.get("postfix") != "") {
+              preview += "-"
+              preview += formData.get("postfix")
+          }
+
+          form["name"].value = preview
+      }
+
+      form.addEventListener('keyup', updatePreview, false);
+      form.addEventListener('change', updatePreview, false);
+      fillName(form)
+  });
+</script>
+
 <form action="/scan" method="post">
-  <div class="form-group">
-    <label>
-      <input name="duplex" type="checkbox">
-      Beidseitig scannen?
-    </label>
-  </div>
+  <input name="name" style="width: 70%" disabled="disabled" value="">
   <div class="form-group" style="clear: both;">
     <div style="float: left">
-    <label>
-      <input name="timestamp" value="{{ .Timestamp }}">
-      Datum
+      <label>
+        <input name="timestamp" value="{{ .Timestamp }}">
+        Datum
       </label>
     </div>
     <label>
@@ -17,19 +44,25 @@
         {{ range .Prefixes }}
         <option name="{{ . }}">{{ . }}</option>
         {{ end }}
-        </select>
+      </select>
       Template
-      </label>
+    </label>
 
-    </div>
-    <div style="float: left">
+  </div>
+  <div style="float: left">
     <label>
-      <input name="name" value="">
-      Name
-      </label>
-    </div>
+      <input name="postfix" value="">
+      Anhang
+    </label>
   </div>
-  <div class="form-group" style="clear: both;">
-  <input type="submit" value="Jo" class="btn">
-  </div>
+</div>
+<div class="form-group" style="clear: both;">
+  <label>
+    <input name="duplex" type="checkbox">
+    Scan duplex (front & back)?
+  </label>
+</div>
+<div class="form-group" style="clear: both;">
+  <input type="submit" value="Scan!" class="btn">
+</div>
 </form>

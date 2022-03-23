@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/adrg/xdg"
@@ -83,26 +82,23 @@ func main() {
 		prefixes := viper.GetStringSlice("filename.prefixes")
 		timestamp := time.Now().Format("2006-01-02")
 		return c.Render("views/scan", fiber.Map{
-			"Title":    "Hello, World!",
-			"Prefixes": prefixes,
+			"Title":     "Hello, World!",
+			"Prefixes":  prefixes,
 			"Timestamp": timestamp,
 		}, "views/layouts/main")
 	})
 
 	app.Post("/scan", func(c *fiber.Ctx) error {
 
-		name := strings.Join([]string{c.FormValue("timestamp", time.Now().Format("2006-01-02")), c.FormValue("template"), c.FormValue("name")}, "-")
-
 		document := scan.Document{
 			Id:     uuid.NewString(),
-			Name:   name,
+			Name:   c.FormValue("name"),
 			Date:   time.Now(),
 			Duplex: c.FormValue("duplex") == "on",
 			Events: make(chan scan.Event),
 		}
 
-
-		documents[document.Id] = & document
+		documents[document.Id] = &document
 
 		go scan.Process(basedir, &document)
 		document.Events <- scan.Event{Message: "Geht los", Type: "info"}
