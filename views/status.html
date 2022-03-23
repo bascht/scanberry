@@ -1,9 +1,34 @@
 <style>
 .show {
   transition: opacity 400ms;
+  display: show;
 }
 .hide {
   opacity: 0;
+  display: none;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+}
+
+/* https://dev.to/dcodeyt/how-to-create-a-css-only-loading-spinner-5fh5 */
+
+.loading::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border: 5px solid #dddddd;
+    border-top-color: #0076d1;
+    border-radius: 50%;
+    animation: loading 1s ease infinite;
+}
+
+@keyframes loading {
+    to {
+        transform: rotate(1turn);
+    }
 }
 </style>
 <script type="text/javascript">
@@ -39,22 +64,27 @@
                   eventList.appendChild(newElement);
               }
           }
+
           if (event.data == "stopped") {
-              showStatus("done")
+              document.getElementById("spinner").remove()
               evtSource.close();
           }
       });
-
   });
 
 </script>
-<h3>Status {{ .full_name }}</h3>
-<div class="hide status" data-name="waiting">⌛</div>
-<div class="hide status" data-name="done">✅</div>
-<div class="hide status" data-name="scanimage">📃</div>
-<div class="hide status" data-name="ocrmypdf">👀</div>
-<pre id="list"></pre>
+
+<div style="float: right" id="spinner" class="loading loading--full-height"></div>
+<div class="hide status" data-name="waiting">⌛ Processing</div>
+<div class="hide status" data-name="convert">⌛ Converting</div>
+<div class="hide status" data-name="done">✅ Scan was successful</div>
+<div class="hide status" data-name="scanimage">📃 Scanning the document</div>
+<div class="hide status" data-name="ocrmypdf">👀 Running OCR</div>
+<div class="hide status" data-name="error">❌ Scan failed, please check the log</div>
+<details>
+  <summary>Detailed log output</summary>
+  <pre id="list"></pre>
+</details>
 <a href="/show/{{ .id }}" class="hide status" data-name="done">{{.FullNameWithExtension}}</a>
-<a href="/scan">
-  Zurück
-</a>
+<hr>
+<a href="/scan">Back</a>

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func Process(basedir string, document *Document) string {
+func Process(basedir string, document *Document) {
 
 	// time.Sleep(5 * time.Second)
 	fmt.Println("STARTING SCAN OF "+document.Name+" with %v to "+basedir, document.Args())
@@ -25,6 +25,7 @@ func Process(basedir string, document *Document) string {
 	commands = append(commands, Command{Name: "convert", Args: []string{"-verbose", filepath.Join(basedir, document.FullName() + "*tif"), filepath.Join(basedir, document.FullName()+"_input.pdf")}})
 	commands = append(commands, Command{Name: "convert", Args: []string{"-verbose", filepath.Join(basedir, document.FullName() + "-1.tif"), filepath.Join(basedir, "downloads", document.FullName()+".thumbnail.jpg")}})
 	commands = append(commands, Command{Name: "ocrmypdf", Args: []string{"--language=deu", filepath.Join(basedir, document.FullName()+"_input.pdf"), filepath.Join(basedir, "downloads", document.FullName()+".pdf")}})
+	commands = append(commands, Command{Name: "cp", Args: []string{filepath.Join(basedir, "downloads", document.FullName()+".pdf"), "/mnt/himbeerkompott/home/bascht/Documents/Scans"}})
 
 		<- document.Events
 		document.Events <- Event{Message: "Geht los", Type: "info"}
@@ -43,10 +44,15 @@ func Process(basedir string, document *Document) string {
 			// done <- true
 		}()
 		command.Wait()
+		if command.cmd.ProcessState.ExitCode() != 0 {
+			document.Events <- Event{Message: "The command did not run successfully :-(", Type: "error" }
+			close(document.Events)
+			return
+		}
 	}
 
-	document.Events <- Event{Message: "Starting to copy", Type: "info"}
 
+	document.Events <- Event{Message: "Scan finished successfully", Type: "done" }
 	// // Open original file
 	// original, err := os.Open(filepath.Join(basedir, document.FullNameWithExtension()))
 	// if err != nil {
@@ -73,5 +79,4 @@ func Process(basedir string, document *Document) string {
 	// fmt.Printf("Bytes Written: %d\n", bytesWritten)
 
 	close(document.Events)
-	return filepath.Join(basedir, document.FullNameWithExtension())
 }
