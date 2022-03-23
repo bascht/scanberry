@@ -60,7 +60,7 @@
                   const eventList = document.getElementById("list");
 
                   showStatus(messageEvent.Type)
-                  newElement.textContent = "message: " + messageEvent.Message;
+                  newElement.textContent += messageEvent.Message;
                   eventList.appendChild(newElement);
               }
           }
